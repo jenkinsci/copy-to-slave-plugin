@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jvnet.hudson.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>1.312</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <groupId>org.jvnet.hudson.plugins</groupId>
+  <artifactId>copy-to-slave</artifactId>
+  <packaging>hpi</packaging>
+  <name>Copy To Slave Plugin</name>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Copy+To+Slave+Plugin</url>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <developers>
+    <developer>
+      <id>rseguy</id>
+      <name>Romain Seguy</name>
+      <email>rseguy@ifrance.com</email>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+
+</project>
