@@ -89,6 +89,7 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
                 projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
             }
             else {
+                // normally we should NEVER get here
                 LOGGER.warning(this.getClass().getName() + " has been invoked on a non-free style project: Skipping it.");
             }
         }
@@ -125,18 +126,32 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
             super(CopyToSlaveBuildWrapper.class);
         }
 
+        private FormValidation checkFile(FreeStyleProject project, String value) throws IOException {
+            FilePath projectWorkspaceOnMaster;
+
+            // do we use a custom workspace?
+            if(project.getCustomWorkspace() != null && project.getCustomWorkspace().length() > 0) {
+                projectWorkspaceOnMaster = new FilePath(new File(project.getCustomWorkspace()));
+            }
+            else {
+                projectWorkspaceOnMaster = new FilePath(new File(project.getRootDir(), "workspace"));
+            }
+
+            return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
+        }
+
         /**
          * Validates {@link CopyToSlaveBuildWrapper#includes}
          */
         public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return FilePath.validateFileMask(project.getWorkspace(), value);
+            return checkFile((FreeStyleProject) project, value);
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#excludes}.
          */
         public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return FilePath.validateFileMask(project.getWorkspace(), value);
+            return checkFile((FreeStyleProject) project, value);
         }
 
         @Override
