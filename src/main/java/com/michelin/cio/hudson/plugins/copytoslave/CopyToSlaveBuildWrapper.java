@@ -31,6 +31,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
+import hudson.model.FreeStyleProject;
 import hudson.model.Hudson.MasterComputer;
 import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildWrapper;
@@ -48,7 +49,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * @author Romain Seguy
- * @version 1.0
+ * @version 1.1
  */
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
@@ -64,14 +65,32 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         if(Computer.currentComputer() instanceof SlaveComputer) {
-            FilePath projectWorkspaceOnMaster = new FilePath(new File(build.getProject().getRootDir(), "workspace"));
-            FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
+            // are we really in a FreeStyleProject?
+            if(build.getProject() instanceof FreeStyleProject) {
+                FilePath projectWorkspaceOnMaster;
+                FreeStyleProject project = (FreeStyleProject) build.getProject();
 
-            LOGGER.finest("Copying '" + getIncludes()
-                    + "', excluding '" + getExcludes()
-                    + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
-                    + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode());
-            projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+                // do we use a custom workspace?
+                if(project.getCustomWorkspace() != null && project.getCustomWorkspace().length() > 0) {
+                    projectWorkspaceOnMaster = new FilePath(new File(project.getCustomWorkspace()));
+                }
+                // no, we don't use a custom workspace: we then need to address
+                // the workspace in an hard-coded way
+                else {
+                    projectWorkspaceOnMaster = new FilePath(new File(build.getProject().getRootDir(), "workspace"));
+                }
+
+                FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
+
+                LOGGER.finest("Copying '" + getIncludes()
+                        + "', excluding '" + getExcludes()
+                        + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
+                        + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode());
+                projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+            }
+            else {
+                LOGGER.warning(this.getClass().getName() + " has been invoked on a non-free style project: Skipping it.");
+            }
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             LOGGER.finest("The build is taking place on the master node, no copy to a slave node will take place.");
@@ -128,7 +147,12 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
-            return true;
+            // I get an error when compiling if using instanceof ==> that's why
+            // I use this not-very-clean stuff below
+            if(item.getClass().getName().equals(FreeStyleProject.class.getName())) {
+                return true;
+            }
+            return false;
         }
 
         @Override
