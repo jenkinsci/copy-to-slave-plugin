@@ -23,9 +23,8 @@
   -->
 
 <div>
-    Sp&eacute;cifiez un <a href='http://ant.apache.org/manual/CoreTypes/fileset.html'>
-    pattern d'exclusion</a> optionnel, du type "**/TEST-*.xml". Un fichier qui
-    correspond &agrave; ce pattern ne sera pas copi&eacute;, m&ecirc;me s'il
-    correspond au masque sp&eacute;cifi&eacute; dans la section 'fichiers
-    &agrave; copier'.
+    When a build taking place on a slave node completes, copies a set of files
+    from this slave node back to the master one.
+    <br/>
+    Of course, no copy will take place if the build was run on the master node.
 </div>

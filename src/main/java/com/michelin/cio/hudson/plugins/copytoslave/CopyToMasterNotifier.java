@@ -28,15 +28,15 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.FreeStyleProject;
 import hudson.model.Hudson.MasterComputer;
 import hudson.model.Project;
 import hudson.slaves.SlaveComputer;
-import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Notifier;
+import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.io.File;
 import java.io.IOException;
@@ -50,19 +50,24 @@ import org.kohsuke.stapler.QueryParameter;
 /**
  * @author Romain Seguy
  */
-public class CopyToSlaveBuildWrapper extends BuildWrapper {
+public class CopyToMasterNotifier extends Notifier {
 
     private final String includes;
     private final String excludes;
 
     @DataBoundConstructor
-    public CopyToSlaveBuildWrapper(String includes, String excludes) {
+    public CopyToMasterNotifier(String includes, String excludes) {
         this.includes = includes;
         this.excludes = excludes;
     }
 
     @Override
-    public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+    public boolean needsToRunAfterFinalized() {
+        return true;
+    }
+
+    @Override
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if(Computer.currentComputer() instanceof SlaveComputer) {
             try {
                 FilePath projectWorkspaceOnMaster;
@@ -82,30 +87,19 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
                 LOGGER.finest("Copying '" + getIncludes()
                         + "', excluding '" + getExcludes()
-                        + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
-                        + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode() + '.');
-                projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+                        + "' from " + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode()
+                        + "to '" + projectWorkspaceOnMaster.toURI() + " on the master.");
+                projectWorkspaceOnSlave.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnMaster);
             }
             catch(ClassCastException cce) {
-                LOGGER.warning("This project is not a free style project: The copy to slave will not take place.");
+                LOGGER.warning("This project is not a free style project: The copy back to the master will not take place.");
             }
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
-            LOGGER.finest("The build is taking place on the master node, no copy to a slave node will take place.");
+            LOGGER.finest("The build is taking place on the master node, no copy back to the master will take place.");
         }
 
-        return new Environment() {
-            @Override
-            public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
-                // we need to return true so that the build can go on
-                return true;
-            }
-        };
-    }
-
-    @Override
-    public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        return setUp(build, launcher, listener);
+        return true;
     }
 
     public String getIncludes() {
@@ -117,58 +111,38 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     }
 
     @Extension
-    public static class DescriptorImpl extends BuildWrapperDescriptor {
+    public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
         public DescriptorImpl() {
-            super(CopyToSlaveBuildWrapper.class);
+            super(CopyToMasterNotifier.class);
         }
 
-        public static FormValidation checkFile(AbstractProject project, String value) throws IOException {
-            try {
-                FilePath projectWorkspaceOnMaster;
-                FreeStyleProject freeStyleProject = (FreeStyleProject) project;
+        @Override
+        public String getDisplayName() {
+            return new Localizable(ResourceBundleHolder.get(CopyToMasterNotifier.class), "DisplayName").toString();
+        }
 
-                // do we use a custom workspace?
-                if(freeStyleProject.getCustomWorkspace() != null && freeStyleProject.getCustomWorkspace().length() > 0) {
-                    projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getCustomWorkspace()));
-                }
-                else {
-                    projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getRootDir(), "workspace"));
-                }
-
-                return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
-            }
-            catch(ClassCastException cce) {
-                return FormValidation.error(ResourceBundleHolder.get(CopyToSlaveBuildWrapper.class).format("NotApplicableForThisProject"));
-            }
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> item) {
+            return true;
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#includes}
          */
         public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return checkFile(project, value);
+            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value);
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#excludes}.
          */
         public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return checkFile(project, value);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return new Localizable(ResourceBundleHolder.get(CopyToSlaveBuildWrapper.class), "DisplayName").toString();
-        }
-
-        @Override
-        public boolean isApplicable(AbstractProject<?, ?> item) {
-            return true;
+            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value);
         }
 
     }
 
-    private static final Logger LOGGER = Logger.getLogger(CopyToSlaveBuildWrapper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CopyToMasterNotifier.class.getName());
 
 }

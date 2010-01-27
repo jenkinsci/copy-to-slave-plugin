@@ -22,10 +22,13 @@
   - THE SOFTWARE.
   -->
 
-<div>
-    Sp&eacute;cifiez un <a href='http://ant.apache.org/manual/CoreTypes/fileset.html'>
-    pattern d'exclusion</a> optionnel, du type "**/TEST-*.xml". Un fichier qui
-    correspond &agrave; ce pattern ne sera pas copi&eacute;, m&ecirc;me s'il
-    correspond au masque sp&eacute;cifi&eacute; dans la section 'fichiers
-    &agrave; copier'.
-</div>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="${%Includes}" field="includes">
+        <f:textbox/>
+    </f:entry>
+    <f:advanced>
+        <f:entry title="${%Excludes}" field="excludes">
+            <f:textbox/>
+        </f:entry>
+    </f:advanced>
+</j:jelly>
