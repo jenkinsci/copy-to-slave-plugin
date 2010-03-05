@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2009, Manufacture FranÃ§aise des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,14 +31,11 @@ import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
-import hudson.model.FreeStyleProject;
 import hudson.model.Hudson.MasterComputer;
-import hudson.model.Project;
 import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import org.jvnet.localizer.Localizable;
@@ -48,7 +45,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
- * @author Romain Seguy
+ * @author Romain Seguy (http://davadoc.deviantart.com)
  */
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
@@ -64,31 +61,14 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         if(Computer.currentComputer() instanceof SlaveComputer) {
-            try {
-                FilePath projectWorkspaceOnMaster;
-                FreeStyleProject project = (FreeStyleProject) build.getProject();
+            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build);
+            FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-                // do we use a custom workspace?
-                if(project.getCustomWorkspace() != null && project.getCustomWorkspace().length() > 0) {
-                    projectWorkspaceOnMaster = new FilePath(new File(project.getCustomWorkspace()));
-                }
-                // no, we don't use a custom workspace: we then need to address
-                // the workspace in an hard-coded way
-                else {
-                    projectWorkspaceOnMaster = new FilePath(new File(build.getProject().getRootDir(), "workspace"));
-                }
-
-                FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
-
-                LOGGER.finest("Copying '" + getIncludes()
-                        + "', excluding '" + getExcludes()
-                        + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
-                        + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode() + '.');
-                projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
-            }
-            catch(ClassCastException cce) {
-                LOGGER.warning("This project is not a free style project: The copy to slave will not take place.");
-            }
+            LOGGER.finest("Copying '" + getIncludes()
+                    + "', excluding '" + getExcludes()
+                    + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
+                    + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode() + '.');
+            projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             LOGGER.finest("The build is taking place on the master node, no copy to a slave node will take place.");
@@ -124,23 +104,8 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         }
 
         public static FormValidation checkFile(AbstractProject project, String value) throws IOException {
-            try {
-                FilePath projectWorkspaceOnMaster;
-                FreeStyleProject freeStyleProject = (FreeStyleProject) project;
-
-                // do we use a custom workspace?
-                if(freeStyleProject.getCustomWorkspace() != null && freeStyleProject.getCustomWorkspace().length() > 0) {
-                    projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getCustomWorkspace()));
-                }
-                else {
-                    projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getRootDir(), "workspace"));
-                }
-
-                return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
-            }
-            catch(ClassCastException cce) {
-                return FormValidation.error(ResourceBundleHolder.get(CopyToSlaveBuildWrapper.class).format("NotApplicableForThisProject"));
-            }
+            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project);
+            return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
         }
 
         /**
