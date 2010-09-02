@@ -13,7 +13,7 @@
   <packaging>hpi</packaging>
   <name>Copy To Slave Plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Copy+To+Slave+Plugin</url>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.1</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,4 +27,10 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/copy-to-slave-1.2.1</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/copy-to-slave-1.2.1</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/copy-to-slave/tags/copy-to-slave-1.2.1</url>
+  </scm>
 </project>
