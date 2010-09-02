@@ -37,6 +37,7 @@ import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
@@ -45,7 +46,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
- * @author Romain Seguy (http://davadoc.deviantart.com)
+ * @author Romain Seguy (http://openromain.blogspot.com)
  */
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
@@ -64,10 +65,9 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
             FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build);
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            LOGGER.finest("Copying '" + getIncludes()
-                    + "', excluding '" + getExcludes()
-                    + "' from " + projectWorkspaceOnMaster.toURI() + " on the master "
-                    + "to '" + projectWorkspaceOnSlave.toURI() + "' on " + Computer.currentComputer().getNode() + '.');
+            LOGGER.log(Level.FINEST,"Copying '{0}', excluding '{1}' from '{2}' on the master to '{3}' on '{4}'.",
+                    new Object[] { getIncludes(), getExcludes(), projectWorkspaceOnMaster.toURI(), projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode() } );
+            CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
             projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
