@@ -31,14 +31,14 @@ import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
+import hudson.model.Hudson;
 import hudson.model.Hudson.MasterComputer;
 import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
 import org.kohsuke.stapler.AncestorInPath;
@@ -52,26 +52,44 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     private final String includes;
     private final String excludes;
+    private final boolean hudsonHomeRelative;  // HUDSON-7021
 
     @DataBoundConstructor
-    public CopyToSlaveBuildWrapper(String includes, String excludes) {
+    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean hudsonHomeRelative) {
         this.includes = includes;
         this.excludes = excludes;
+        this.hudsonHomeRelative = hudsonHomeRelative;
     }
 
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+        if(StringUtils.isBlank(getIncludes())) {
+            listener.fatalError(
+                    "No includes have been defined for the \"Copy files to slave node before building\" option: It is mandatory to define them.");
+            return null;
+        }
+
         if(Computer.currentComputer() instanceof SlaveComputer) {
-            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build);
+            FilePath rootFilePathOnMaster;
+            if(!isHudsonHomeRelative()) {
+                rootFilePathOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
+            }
+            else {  // HUDSON-7021
+                rootFilePathOnMaster = Hudson.getInstance().getRootPath();
+            }
+
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            LOGGER.log(Level.FINEST,"Copying '{0}', excluding '{1}' from '{2}' on the master to '{3}' on '{4}'.",
-                    new Object[] { getIncludes(), getExcludes(), projectWorkspaceOnMaster.toURI(), projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode() } );
+            listener.getLogger().printf("Copying '%s', excluding '%s' from '%s' on the master to '%s' on '%s'.\n",
+                    getIncludes(), getExcludes(), rootFilePathOnMaster.toURI(),
+                    projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode());
+
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
-            projectWorkspaceOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+            rootFilePathOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
-            LOGGER.finest("The build is taking place on the master node, no copy to a slave node will take place.");
+            listener.getLogger().println(
+                    "The build is taking place on the master node, no copy to a slave node will take place.");
         }
 
         return new Environment() {
@@ -96,6 +114,10 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         return excludes;
     }
 
+    public boolean isHudsonHomeRelative() {
+        return hudsonHomeRelative;
+    }
+
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
 
@@ -104,7 +126,7 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         }
 
         public static FormValidation checkFile(AbstractProject project, String value) throws IOException {
-            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project);
+            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project, null);
             return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
         }
 
@@ -133,7 +155,5 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         }
 
     }
-
-    private static final Logger LOGGER = Logger.getLogger(CopyToSlaveBuildWrapper.class.getName());
 
 }

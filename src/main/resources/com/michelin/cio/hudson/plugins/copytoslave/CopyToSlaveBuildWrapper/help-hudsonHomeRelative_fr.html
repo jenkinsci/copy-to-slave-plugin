@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,9 @@
   - THE SOFTWARE.
   -->
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry title="${%Includes}" field="includes">
-        <f:textbox/>
-    </f:entry>
-    <f:advanced>
-        <f:entry title="${%Excludes}" field="excludes">
-            <f:textbox/>
-        </f:entry>
-        <f:entry field="hudsonHomeRelative">
-            <f:checkbox
-                name="hudsonHomeRelative"
-                checked="${instance.hudsonHomeRelative}"/>
-            <label class="attach-previous">${%HudsonHomeRelative}</label>
-        </f:entry>
-    </f:advanced>
-</j:jelly>
+<div>
+    Activez cette option si les chemins sp&eacute;cifi&eacute;s pour les champs
+    <strong>Fichiers &agrave; copier</strong> et <strong>Fichiers &agrave;
+    exclure de la copie</strong> sont relatifs &agrave; <code>HUDSON_HOME</code>
+    et non pas au <a href="ws/">workspace</a>.
+</div>

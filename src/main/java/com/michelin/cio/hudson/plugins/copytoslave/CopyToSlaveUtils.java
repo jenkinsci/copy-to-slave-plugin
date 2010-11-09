@@ -32,32 +32,51 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
  */
 public class CopyToSlaveUtils {
 
-    public static FilePath getProjectWorkspaceOnMaster(AbstractBuild build) {
-        return getProjectWorkspaceOnMaster(build.getProject());
+    public static FilePath getProjectWorkspaceOnMaster(AbstractBuild build, PrintStream logger) {
+        return getProjectWorkspaceOnMaster(build.getProject(), logger);
     }
 
-    public static FilePath getProjectWorkspaceOnMaster(AbstractProject project) {
+    public static FilePath getProjectWorkspaceOnMaster(AbstractProject project, PrintStream logger) {
+        FilePath projectWorkspaceOnMaster;
+
         // free-style projects
         if(project instanceof FreeStyleProject) {
             FreeStyleProject freeStyleProject = (FreeStyleProject) project;
 
             // do we use a custom workspace?
             if(freeStyleProject.getCustomWorkspace() != null && freeStyleProject.getCustomWorkspace().length() > 0) {
-                return new FilePath(new File(freeStyleProject.getCustomWorkspace()));
+                projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getCustomWorkspace()));
             }
             else {
-                return new FilePath(new File(freeStyleProject.getRootDir(), "workspace"));
+                projectWorkspaceOnMaster = new FilePath(new File(freeStyleProject.getRootDir(), "workspace"));
             }
         }
+        else {
+            projectWorkspaceOnMaster = new FilePath(new File(project.getRootDir(), "workspace"));
+        }
 
-        return new FilePath(new File(project.getRootDir(), "workspace"));
+        try {
+            // create the workspace if it doesn't exist yet
+            projectWorkspaceOnMaster.mkdirs();
+        }
+        catch (Exception e) {
+            if(logger != null) {
+                logger.println("An exception occured while creating " + projectWorkspaceOnMaster.getName() + ": " + e);
+            }
+            LOGGER.log(Level.SEVERE, "An exception occured while creating " + projectWorkspaceOnMaster.getName(), e);
+        }
+
+        return projectWorkspaceOnMaster;
     }
 
     /**
@@ -84,5 +103,7 @@ public class CopyToSlaveUtils {
         }
         // End workaround
     }
+
+    private final static Logger LOGGER = Logger.getLogger(CopyToSlaveUtils.class.getName());
 
 }

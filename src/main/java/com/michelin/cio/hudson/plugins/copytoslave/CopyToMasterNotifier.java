@@ -33,12 +33,11 @@ import hudson.model.Computer;
 import hudson.model.Hudson.MasterComputer;
 import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
 import org.kohsuke.stapler.AncestorInPath;
@@ -67,16 +66,19 @@ public class CopyToMasterNotifier extends Notifier {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if(Computer.currentComputer() instanceof SlaveComputer) {
-            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build);
+            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            LOGGER.log(Level.FINEST, "Copying '{0}', excluding '{1}' from '{2}' on '{3}' to '{4}' on the master.",
-                    new Object[] { getIncludes(), getExcludes(), projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode(), projectWorkspaceOnMaster.toURI() });
+            listener.getLogger().printf("Copying '%s', excluding '%s' from '%s' on '%s' to '%s' on the master.\n",
+                    getIncludes(), getExcludes(), projectWorkspaceOnSlave.toURI(),
+                    Computer.currentComputer().getNode(), projectWorkspaceOnMaster.toURI());
+            
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
             projectWorkspaceOnSlave.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnMaster);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
-            LOGGER.finest("The build is taking place on the master node, no copy back to the master will take place.");
+            listener.getLogger().println(
+                    "The build is taking place on the master node, no copy back to the master will take place.");
         }
 
         return true;
@@ -88,6 +90,10 @@ public class CopyToMasterNotifier extends Notifier {
 
     public String getExcludes() {
         return excludes;
+    }
+
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
     }
 
     @Extension
@@ -122,7 +128,5 @@ public class CopyToMasterNotifier extends Notifier {
         }
 
     }
-
-    private static final Logger LOGGER = Logger.getLogger(CopyToMasterNotifier.class.getName());
 
 }
