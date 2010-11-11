@@ -125,23 +125,33 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
             super(CopyToSlaveBuildWrapper.class);
         }
 
-        public static FormValidation checkFile(AbstractProject project, String value) throws IOException {
-            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project, null);
-            return FilePath.validateFileMask(projectWorkspaceOnMaster, value);
+        public static FormValidation checkFile(AbstractProject project, String value, boolean hudsonHomeRelative) throws IOException {
+            FilePath rootFilePathOnMaster;
+            if(!hudsonHomeRelative) {
+                rootFilePathOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project, null);
+            }
+            else {
+                rootFilePathOnMaster = Hudson.getInstance().getRootPath();
+            }
+            return FilePath.validateFileMask(rootFilePathOnMaster, value);
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#includes}
          */
-        public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return checkFile(project, value);
+        public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value, @QueryParameter boolean hudsonHomeRelative) throws IOException {
+            // hmmm, this method can be used to check if a file exists in the
+            // file system, so it should be protected... but how about user
+            // validation then? I have to think about that
+            return checkFile(project, value, hudsonHomeRelative);
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#excludes}.
          */
-        public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return checkFile(project, value);
+        public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value, @QueryParameter boolean hudsonHomeRelative) throws IOException {
+            // cf. comment in doCheckIncludes()
+            return checkFile(project, value, hudsonHomeRelative);
         }
 
         @Override

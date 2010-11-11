@@ -117,14 +117,14 @@ public class CopyToMasterNotifier extends Notifier {
          * Validates {@link CopyToSlaveBuildWrapper#includes}
          */
         public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value);
+            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value, false);
         }
 
         /**
          * Validates {@link CopyToSlaveBuildWrapper#excludes}.
          */
         public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value);
+            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value, false);
         }
 
     }
