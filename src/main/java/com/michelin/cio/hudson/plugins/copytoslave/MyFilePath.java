@@ -51,6 +51,8 @@ import org.apache.tools.tar.TarEntry;
  */
 public class MyFilePath {
 
+    private static final long serialVersionUID = 1; // HUDSON-8274
+
     /**
      * Enhances Hudson's {@link FilePath#copyRecursiveTo} until I patch Hudson
      * core and upgrade the plugin to the corresponding Hudson version.
@@ -62,6 +64,8 @@ public class MyFilePath {
         final Pipe pipe = Pipe.createLocalToRemote();
 
         Future<Void> future = target.actAsync(new FileCallable<Void>() {
+            private static final long serialVersionUID = 1; // HUDSON-8274
+
             public Void invoke(File f, VirtualChannel channel) throws IOException {
                 try {
                     readFromTar(source.getRemote() + '/' + fileMask, f, TarCompression.GZIP.extract(pipe.getIn()));

@@ -52,12 +52,14 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     private final String includes;
     private final String excludes;
-    private final boolean hudsonHomeRelative;  // HUDSON-7021
+    private final boolean includeAntExcludes; // HUDSON-8274
+    private final boolean hudsonHomeRelative; // HUDSON-7021
 
     @DataBoundConstructor
-    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean hudsonHomeRelative) {
+    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean includeAntExcludes, boolean hudsonHomeRelative) {
         this.includes = includes;
         this.excludes = excludes;
+        this.includeAntExcludes = includeAntExcludes;
         this.hudsonHomeRelative = hudsonHomeRelative;
     }
 
@@ -86,8 +88,14 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
 
-            // HUDSON-7999
-            MyFilePath.copyRecursiveTo(rootFilePathOnMaster, getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+            // TODO refactor this to use a clean pattern (externalize this very complex logic into a CopyMethod class for example)
+            if(isIncludeAntExcludes()) {
+                // HUDSON-7999
+                MyFilePath.copyRecursiveTo(rootFilePathOnMaster, getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+            }
+            else {
+                rootFilePathOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
+            }
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
@@ -114,6 +122,10 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     public String getExcludes() {
         return excludes;
+    }
+
+    public boolean isIncludeAntExcludes() {
+        return includeAntExcludes;
     }
 
     public boolean isHudsonHomeRelative() {
