@@ -52,13 +52,15 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     private final String includes;
     private final String excludes;
-    private final boolean includeAntExcludes; // HUDSON-8274
+    private final boolean flatten;  // HUDSON-8220
+    private final boolean includeAntExcludes; // HUDSON-8274 (partially)
     private final boolean hudsonHomeRelative; // HUDSON-7021
 
     @DataBoundConstructor
-    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean includeAntExcludes, boolean hudsonHomeRelative) {
+    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean flatten, boolean includeAntExcludes, boolean hudsonHomeRelative) {
         this.includes = includes;
         this.excludes = excludes;
+        this.flatten = flatten;
         this.includeAntExcludes = includeAntExcludes;
         this.hudsonHomeRelative = hudsonHomeRelative;
     }
@@ -84,18 +86,12 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
             listener.getLogger().printf("Copying '%s', excluding '%s' from '%s' on the master to '%s' on '%s'.\n",
                     getIncludes(), getExcludes(), rootFilePathOnMaster.toURI(),
-                    projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode());
+                    projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
 
-            // TODO refactor this to use a clean pattern (externalize this very complex logic into a CopyMethod class for example)
-            if(isIncludeAntExcludes()) {
-                // HUDSON-7999
-                MyFilePath.copyRecursiveTo(rootFilePathOnMaster, getIncludes(), getExcludes(), projectWorkspaceOnSlave);
-            }
-            else {
-                rootFilePathOnMaster.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnSlave);
-            }
+            // HUDSON-7999
+            MyFilePath.copyRecursiveTo(rootFilePathOnMaster, getIncludes(), getExcludes(), isFlatten(), isIncludeAntExcludes(), projectWorkspaceOnSlave);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
@@ -126,6 +122,10 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     public boolean isIncludeAntExcludes() {
         return includeAntExcludes;
+    }
+
+    public boolean isFlatten() {
+        return flatten;
     }
 
     public boolean isHudsonHomeRelative() {

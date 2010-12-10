@@ -30,6 +30,12 @@
         <f:entry title="${%Excludes}" field="excludes">
             <f:textbox/>
         </f:entry>
+        <f:entry field="flatten">
+            <f:checkbox
+                name="flatten"
+                checked="${instance.flatten}"/>
+            <label class="attach-previous">${%Flatten}</label>
+        </f:entry>
         <f:entry field="includeAntExcludes">
             <f:checkbox
                 name="includeAntExcludes"

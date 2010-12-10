@@ -40,21 +40,26 @@ public class MyGlobDirScanner extends DirScanner {
 
     private final String includes;
     private final String excludes;
+    private final boolean includeAntExcludes;
 
-    MyGlobDirScanner(String includes, String excludes) {
+    MyGlobDirScanner(final String includes, final String excludes, final boolean includeAntExcludes) {
         this.includes = includes;
         this.excludes = excludes;
+        this.includeAntExcludes = includeAntExcludes;
     }
 
     public void scan(File dir, FileVisitor visitor) throws IOException {
         if(Util.fixEmpty(includes)==null && excludes==null) {
             // optimization
-            new Full().scan(dir,visitor);
+            new Full().scan(dir, visitor);
             return;
         }
 
         FileSet fs = Util.createFileSet(dir,includes,excludes);
-        fs.setDefaultexcludes(false); // HUDSON-7999
+
+        if(includeAntExcludes) {
+            fs.setDefaultexcludes(false); // HUDSON-7999
+        }
 
         if(dir.exists()) {
             DirectoryScanner ds = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
