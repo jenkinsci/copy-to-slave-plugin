@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 import org.apache.tools.tar.TarEntry;
 
@@ -49,7 +50,7 @@ import org.apache.tools.tar.TarEntry;
  * Complements Hudson's {@link FilePath} to enhance the {@code copyRecursiveTo()}
  * method so that it doesn't use Ant's default excludes (cf. HUDSON-7999).
  */
-public class MyFilePath {
+public class MyFilePath implements Serializable {
 
     private static final long serialVersionUID = 1; // HUDSON-8274
 
