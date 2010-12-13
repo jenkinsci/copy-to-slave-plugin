@@ -150,7 +150,8 @@ public class MyFilePath implements Serializable {
                             }
                             chmodTask.setProject(new Project());
                             chmodTask.setFile(f);
-                            chmodTask.setPerm(Integer.toString(mode));
+                            chmodTask.setPerm(Integer.toOctalString(mode));
+                            chmodTask.execute();
                         }
                 }
             }
