@@ -83,7 +83,8 @@ public class CopyToSlaveUtils {
      * Workaround for HUDSON-5977.
      *
      * <p>The code of this method comes from the copyartifact plugin by Alan Harder,
-     * more preciselyt from {@code hudson.plugins.copyartifact.CopyArtifact.perform()}.
+     * more precisely from {@code hudson.plugins.copyartifact.CopyArtifact.perform()},
+     * with some minor modifications.
      * Cf. MIT License header.</p>
      */
     public static void hudson5977(FilePath targetDir) throws IOException, InterruptedException {
@@ -98,7 +99,7 @@ public class CopyToSlaveUtils {
                          .getPlugin("copy-to-slave").baseResourceURL;
         if (base!=null && "file".equals(base.getProtocol())) {
             FilePath tmp = targetDir.createTempDir("copy-to-slave", ".dir");
-            new FilePath(new File(base.getPath())).copyRecursiveTo("HUDSON-5977/**", tmp);
+            MyFilePath.copyRecursiveTo(new FilePath(new File(base.getPath())), "HUDSON-5977/**", null, false, false, tmp);
             tmp.deleteRecursive();
         }
         // End workaround

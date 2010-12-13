@@ -53,6 +53,8 @@ import org.apache.tools.tar.TarEntry;
  * Complements Hudson's {@link FilePath} to enhance the {@code copyRecursiveTo()}
  * method so that it offer a possibility to flatten dirs (cf. HUDSON-8220) and
  * to not use Ant's default excludes (cf. HUDSON-7999).
+ *
+ * <p>This class also fixes HUDSON-8155.</p>
  */
 public class MyFilePath implements Serializable {
 
@@ -69,10 +71,6 @@ public class MyFilePath implements Serializable {
             final String fileMask, final String excludes,
             final boolean flatten, final boolean includeAntExcludes,
             final FilePath target) throws IOException, InterruptedException {
-        if(!flatten && !includeAntExcludes) {
-            return source.copyRecursiveTo(fileMask, excludes, target);
-        }
-
         // local -> remote copy
         final Pipe pipe = Pipe.createLocalToRemote();
 
@@ -135,7 +133,7 @@ public class MyFilePath implements Serializable {
                     }
 
                     IOUtils.copy(t, f);
-                    
+
                     f.setLastModified(tarEntry.getModTime().getTime());
 
                     // chmod
