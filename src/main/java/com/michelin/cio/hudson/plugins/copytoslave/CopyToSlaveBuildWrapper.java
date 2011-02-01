@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,11 @@
  */
 package com.michelin.cio.hudson.plugins.copytoslave;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
@@ -37,6 +39,7 @@ import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
+import hudson.util.VariableResolver;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
@@ -67,9 +70,12 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+        EnvVars env = build.getEnvironment(listener);
+        VariableResolver<String> varResolver = build.getBuildVariableResolver();
+
         if(StringUtils.isBlank(getIncludes())) {
             listener.fatalError(
-                    "No includes have been defined for the \"Copy files to slave node before building\" option: It is mandatory to define them.");
+                    "[copy-to-slave] No includes have been defined for the \"Copy files to slave node before building\" option: It is mandatory to define them.");
             return null;
         }
 
@@ -84,19 +90,25 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            listener.getLogger().printf("Copying '%s', excluding '%s' from '%s' on the master to '%s' on '%s'.\n",
-                    getIncludes(), getExcludes(), rootFilePathOnMaster.toURI(),
+            String includes = Util.replaceMacro(env.expand(getIncludes()), varResolver);
+            String excludes = Util.replaceMacro(env.expand(getExcludes()), varResolver);
+
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding '%s' from '%s' on the master to '%s' on '%s'.\n",
+                    includes, excludes, rootFilePathOnMaster.toURI(),
                     projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
 
             // HUDSON-7999
             MyFilePath.copyRecursiveTo(
-                    rootFilePathOnMaster, getIncludes(), getExcludes(), isFlatten(), isIncludeAntExcludes(), projectWorkspaceOnSlave);
+                    rootFilePathOnMaster,
+                    includes,
+                    excludes,
+                    isFlatten(), isIncludeAntExcludes(), projectWorkspaceOnSlave);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
-                    "The build is taking place on the master node, no copy to a slave node will take place.");
+                    "[copy-to-slave] The build is taking place on the master node, no copy to a slave node will take place.");
         }
 
         return new Environment() {

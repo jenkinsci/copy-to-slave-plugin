@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,11 @@
  */
 package com.michelin.cio.hudson.plugins.copytoslave;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -37,6 +39,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.VariableResolver;
 import java.io.IOException;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
@@ -65,20 +68,26 @@ public class CopyToMasterNotifier extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        EnvVars env = build.getEnvironment(listener);
+        VariableResolver<String> varResolver = build.getBuildVariableResolver();
+
         if(Computer.currentComputer() instanceof SlaveComputer) {
             FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            listener.getLogger().printf("Copying '%s', excluding '%s' from '%s' on '%s' to '%s' on the master.\n",
-                    getIncludes(), getExcludes(), projectWorkspaceOnSlave.toURI(),
+            String includes = Util.replaceMacro(env.expand(getIncludes()), varResolver);
+            String excludes = Util.replaceMacro(env.expand(getExcludes()), varResolver);
+
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding '%s' from '%s' on '%s' to '%s' on the master.\n",
+                    includes, excludes, projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), projectWorkspaceOnMaster.toURI());
-            
+
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
-            projectWorkspaceOnSlave.copyRecursiveTo(getIncludes(), getExcludes(), projectWorkspaceOnMaster);
+            projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, projectWorkspaceOnMaster);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
-                    "The build is taking place on the master node, no copy back to the master will take place.");
+                    "[copy-to-slave] The build is taking place on the master node, no copy back to the master will take place.");
         }
 
         return true;
