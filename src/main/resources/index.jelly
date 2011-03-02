@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
   -->
 
 <div>
-    This plugin adds "Copy files to slave node before building" and "Copy files
-    back to the master" options to projects.
+    This plugin allows copying files located somewhere on the master node into
+    the jobs' workspaces, whether their builds take place on the master node or
+    on slave nodes.
 </div>

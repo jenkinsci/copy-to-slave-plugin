@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010, InfraDNA, Inc., Manufacture Française des Pneumatiques Michelin,
+ * Copyright (c) 2010-2011, InfraDNA, Inc., Manufacture Française des Pneumatiques Michelin,
  * Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -63,7 +63,7 @@ public class MyGlobDirScanner extends DirScanner {
 
         if(dir.exists()) {
             DirectoryScanner ds = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
-            for( String f : ds.getIncludedFiles()) {
+            for(String f : ds.getIncludedFiles()) {
                 File file = new File(dir, f);
                 visitor.visit(file,f);
             }

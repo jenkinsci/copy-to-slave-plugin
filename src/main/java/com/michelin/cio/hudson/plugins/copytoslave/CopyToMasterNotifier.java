@@ -27,7 +27,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -38,14 +37,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import hudson.util.FormValidation;
-import hudson.util.VariableResolver;
 import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
@@ -69,17 +65,17 @@ public class CopyToMasterNotifier extends Notifier {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         EnvVars env = build.getEnvironment(listener);
-        VariableResolver<String> varResolver = build.getBuildVariableResolver();
+        env.overrideAll(build.getBuildVariables());
 
         if(Computer.currentComputer() instanceof SlaveComputer) {
             FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            String includes = Util.replaceMacro(env.expand(getIncludes()), varResolver);
-            String excludes = Util.replaceMacro(env.expand(getExcludes()), varResolver);
+            String includes = env.expand(getIncludes());
+            String excludes = env.expand(getExcludes());
 
-            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding '%s' from '%s' on '%s' to '%s' on the master.\n",
-                    includes, excludes, projectWorkspaceOnSlave.toURI(),
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on '%s' to '%s' on the master.\n",
+                    includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), projectWorkspaceOnMaster.toURI());
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
@@ -120,20 +116,6 @@ public class CopyToMasterNotifier extends Notifier {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> item) {
             return true;
-        }
-
-        /**
-         * Validates {@link CopyToSlaveBuildWrapper#includes}
-         */
-        public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value, false);
-        }
-
-        /**
-         * Validates {@link CopyToSlaveBuildWrapper#excludes}.
-         */
-        public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
-            return CopyToSlaveBuildWrapper.DescriptorImpl.checkFile(project, value, false);
         }
 
     }

@@ -27,7 +27,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
@@ -35,66 +34,84 @@ import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
 import hudson.model.Hudson.MasterComputer;
-import hudson.slaves.SlaveComputer;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
-import hudson.util.FormValidation;
-import hudson.util.VariableResolver;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
  */
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
+    public final static String RELATIVE_TO_HOME = "home";
+    public final static String RELATIVE_TO_USERCONTENT = "userContent";
+    public final static String RELATIVE_TO_WORKSPACE = "workspace";
+
     private final String includes;
     private final String excludes;
     private final boolean flatten;  // HUDSON-8220
     private final boolean includeAntExcludes; // HUDSON-8274 (partially)
-    private final boolean hudsonHomeRelative; // HUDSON-7021
+    @Deprecated
+    private final boolean hudsonHomeRelative; // HUDSON-7021 (as of 2011/03/01, replaced by relativeTo
+                                              // and kept for backward compatibility)
+    private final String relativeTo;
 
     @DataBoundConstructor
-    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean flatten, boolean includeAntExcludes, boolean hudsonHomeRelative) {
+    public CopyToSlaveBuildWrapper(String includes, String excludes, boolean flatten, boolean includeAntExcludes, String relativeTo, boolean hudsonHomeRelative) {
         this.includes = includes;
         this.excludes = excludes;
         this.flatten = flatten;
         this.includeAntExcludes = includeAntExcludes;
-        this.hudsonHomeRelative = hudsonHomeRelative;
+        if(hudsonHomeRelative) { // backward compatibility
+            this.relativeTo = RELATIVE_TO_HOME;
+        }
+        else if(StringUtils.isBlank(relativeTo)) {
+            this.relativeTo = RELATIVE_TO_USERCONTENT;
+        }
+        else {
+            this.relativeTo = relativeTo;
+        }
+        this.hudsonHomeRelative = false; // force hudsonHomeRelative to false to not use it anymore
     }
 
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         EnvVars env = build.getEnvironment(listener);
-        VariableResolver<String> varResolver = build.getBuildVariableResolver();
+        env.overrideAll(build.getBuildVariables());
 
         if(StringUtils.isBlank(getIncludes())) {
             listener.fatalError(
-                    "[copy-to-slave] No includes have been defined for the \"Copy files to slave node before building\" option: It is mandatory to define them.");
+                    "[copy-to-slave] No includes have been defined: It is mandatory to define them.");
             return null;
         }
 
-        if(Computer.currentComputer() instanceof SlaveComputer) {
+        if(Computer.currentComputer() instanceof MasterComputer && RELATIVE_TO_WORKSPACE.equals(relativeTo)) {
+            listener.getLogger().println(
+                    "[copy-to-slave] Trying to copy files from the workspace on the master to the same workspace on the same master: No copy will take place.");
+        }
+        else {
             FilePath rootFilePathOnMaster;
-            if(!isHudsonHomeRelative()) {
+            if(RELATIVE_TO_WORKSPACE.equals(relativeTo)) {
                 rootFilePathOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
             }
-            else {  // HUDSON-7021
+            else if(RELATIVE_TO_HOME.equals(relativeTo)) {
                 rootFilePathOnMaster = Hudson.getInstance().getRootPath();
+            }
+            else {
+                rootFilePathOnMaster = Hudson.getInstance().getRootPath().child("userContent");
             }
 
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
-            String includes = Util.replaceMacro(env.expand(getIncludes()), varResolver);
-            String excludes = Util.replaceMacro(env.expand(getExcludes()), varResolver);
+            String includes = env.expand(getIncludes());
+            String excludes = env.expand(getExcludes());
 
-            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding '%s' from '%s' on the master to '%s' on '%s'.\n",
-                    includes, excludes, rootFilePathOnMaster.toURI(),
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on the master to '%s' on '%s'.\n",
+                    includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', rootFilePathOnMaster.toURI(),
                     projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
@@ -105,10 +122,6 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
                     includes,
                     excludes,
                     isFlatten(), isIncludeAntExcludes(), projectWorkspaceOnSlave);
-        }
-        else if(Computer.currentComputer() instanceof MasterComputer) {
-            listener.getLogger().println(
-                    "[copy-to-slave] The build is taking place on the master node, no copy to a slave node will take place.");
         }
 
         return new Environment() {
@@ -133,6 +146,16 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         return excludes;
     }
 
+    public String getRelativeTo() {
+        if(hudsonHomeRelative) { // backward compatibility
+            return RELATIVE_TO_HOME;
+        }
+        if(StringUtils.isBlank(relativeTo)) {
+            return RELATIVE_TO_USERCONTENT;
+        }
+        return relativeTo;
+    }
+
     public boolean isIncludeAntExcludes() {
         return includeAntExcludes;
     }
@@ -141,44 +164,11 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         return flatten;
     }
 
-    public boolean isHudsonHomeRelative() {
-        return hudsonHomeRelative;
-    }
-
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
 
         public DescriptorImpl() {
             super(CopyToSlaveBuildWrapper.class);
-        }
-
-        public static FormValidation checkFile(AbstractProject project, String value, boolean hudsonHomeRelative) throws IOException {
-            FilePath rootFilePathOnMaster;
-            if(!hudsonHomeRelative) {
-                rootFilePathOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(project, null);
-            }
-            else {
-                rootFilePathOnMaster = Hudson.getInstance().getRootPath();
-            }
-            return FilePath.validateFileMask(rootFilePathOnMaster, value);
-        }
-
-        /**
-         * Validates {@link CopyToSlaveBuildWrapper#includes}
-         */
-        public FormValidation doCheckIncludes(@AncestorInPath AbstractProject project, @QueryParameter String value, @QueryParameter boolean hudsonHomeRelative) throws IOException {
-            // hmmm, this method can be used to check if a file exists in the
-            // file system, so it should be protected... but how about user
-            // validation then? I have to think about that
-            return checkFile(project, value, hudsonHomeRelative);
-        }
-
-        /**
-         * Validates {@link CopyToSlaveBuildWrapper#excludes}.
-         */
-        public FormValidation doCheckExcludes(@AncestorInPath AbstractProject project, @QueryParameter String value, @QueryParameter boolean hudsonHomeRelative) throws IOException {
-            // cf. comment in doCheckIncludes()
-            return checkFile(project, value, hudsonHomeRelative);
         }
 
         @Override

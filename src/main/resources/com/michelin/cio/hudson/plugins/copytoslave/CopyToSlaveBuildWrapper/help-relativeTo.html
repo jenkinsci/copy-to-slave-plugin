@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2010-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,15 @@
   -->
 
 <div>
-    Enable this option if the paths that have been specified for the <strong>
-    Includes</strong> and <strong>Excludes</strong> fields are relative to
-    <code>HUDSON_HOME</code> rather than to the <a href="ws/">workspace</a>.
+    Specify the base location for the paths that are specified in the <strong>
+    Includes</strong> and <strong>Excludes</strong> fields:
+    <ul>
+    <li>The <code>HUDSON_HOME/userContent</code> option should be preferred
+    since it is the standard folder used by Hudson/Jenkins to expose files to
+    users.</li>
+    <li>Using <code>HUDSON_HOME</code> is not advised since it exposes the
+    whole Hudson/Jenkins folder.</li>
+    <li>Using the job's <a href="ws/">workspace</a> is not advised since it
+    requires manually creating it before running a first build.</li>
+    </ul>
 </div>

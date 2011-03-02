@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,9 @@
   -->
 
 <div>
-    Comma- or space-separated list of patterns of files/directories to be copied
-    from the master node to the slave one. See the
-    <a href="http://ant.apache.org/manual/Types/fileset.html">@includes of
-    Ant fileset</a> for the exact format. The base directory is the
-    <a href="ws/">workspace</a>.
-    <br/>
+    Comma- or space-separated list of patterns of files/directories to be copied.
+    See the <a href="http://ant.apache.org/manual/Types/fileset.html">@includes
+    of Ant fileset</a> for the exact format. The base directory is defined by
+    the <strong>Paths are relative to</strong> field.<br/>
     E.g.: *.xml,**/*.properties
 </div>
