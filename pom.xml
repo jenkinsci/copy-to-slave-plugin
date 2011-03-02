@@ -13,7 +13,7 @@
   <packaging>hpi</packaging>
   <name>Copy To Slave Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,9 +43,9 @@
 
   <!-- see http://groups.google.com/group/hudson-dev/browse_thread/thread/83e34c639eec470a for the rationale behind this -->
   <scm>
-    <connection>scm:svn:https://guest@svn.jenkins-ci.org/trunk/hudson/plugins/copy-to-slave/</connection>
-    <developerConnection>scm:svn:https://svn.jenkins-ci.org/trunk/hudson/plugins/copy-to-slave/</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/trunk/hudson/plugins/copy-to-slave</url>
+    <connection>scm:svn:https://guest@svn.jenkins-ci.org/tags/copy-to-slave-1.3</connection>
+    <developerConnection>scm:svn:https://svn.jenkins-ci.org/tags/copy-to-slave-1.3</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/copy-to-slave-1.3</url>
   </scm>
 
   <!-- see http://groups.google.com/group/hudson-dev/browse_thread/thread/6ea03cf2b527376c for the rationale behind this -->
