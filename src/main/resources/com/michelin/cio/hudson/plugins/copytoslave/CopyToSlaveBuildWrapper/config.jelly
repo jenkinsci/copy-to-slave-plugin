@@ -27,12 +27,12 @@
         <f:textbox/>
     </f:entry>
     <f:entry title="${%RelativeTo}" field="relativeTo">
-        <f:radio name="copytoslave.relativeTo" value="userContent" checked="${instance.relativeTo == 'userContent'}" id="relativeTo.userContent"/>
-        <label for="relativeTo.userContent">${%UserContentRelative}</label><br/>
+        <f:radio name="copytoslave.relativeTo" value="userContent" checked="${instance.relativeTo == 'userContent' or instance.relativeTo == null}" id="relativeTo.userContent"/>
+        <label class="attach-previous">${%UserContentRelative}</label><br/>
         <f:radio name="copytoslave.relativeTo" value="home" checked="${instance.relativeTo == 'home'}" id="relativeTo.home"/>
-        <label for="relativeTo.home">${%HomeRelative}</label><br/>
+        <label class="attach-previous">${%HomeRelative}</label><br/>
         <f:radio name="copytoslave.relativeTo" value="workspace" checked="${instance.relativeTo == 'workspace'}" id="relativeTo.workspace"/>
-        <label for="relativeTo.workspace">${%WorkspaceRelative}</label>
+        <label class="attach-previous">${%WorkspaceRelative}</label>
     </f:entry>
     <f:advanced>
         <f:entry title="${%Excludes}" field="excludes">
