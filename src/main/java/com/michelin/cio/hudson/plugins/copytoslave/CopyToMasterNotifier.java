@@ -37,6 +37,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import java.io.File;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
@@ -50,11 +51,15 @@ public class CopyToMasterNotifier extends Notifier {
 
     private final String includes;
     private final String excludes;
+    private final boolean overrideDestinationFolder;
+    private final String destinationFolder;
 
     @DataBoundConstructor
-    public CopyToMasterNotifier(String includes, String excludes) {
+    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder) {
         this.includes = includes;
         this.excludes = excludes;
+        this.overrideDestinationFolder = overrideDestinationFolder;
+        this.destinationFolder = destinationFolder;
     }
 
     @Override
@@ -68,7 +73,14 @@ public class CopyToMasterNotifier extends Notifier {
         env.overrideAll(build.getBuildVariables());
 
         if(Computer.currentComputer() instanceof SlaveComputer) {
-            FilePath projectWorkspaceOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
+            FilePath destinationFilePath;
+            if(isOverrideDestinationFolder() && StringUtils.isNotBlank(getDestinationFolder())) {
+                destinationFilePath = new FilePath(new File(env.expand(getDestinationFolder())));
+            }
+            else {
+                destinationFilePath = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
+            }
+
             FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
 
             String includes = env.expand(getIncludes());
@@ -76,10 +88,10 @@ public class CopyToMasterNotifier extends Notifier {
 
             listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on '%s' to '%s' on the master.\n",
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
-                    Computer.currentComputer().getNode(), projectWorkspaceOnMaster.toURI());
+                    Computer.currentComputer().getNode(), destinationFilePath.toURI());
 
             CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
-            projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, projectWorkspaceOnMaster);
+            projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, destinationFilePath);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
@@ -97,6 +109,14 @@ public class CopyToMasterNotifier extends Notifier {
         return excludes;
     }
 
+    public String getDestinationFolder() {
+        return destinationFolder;
+    }
+
+    public boolean isOverrideDestinationFolder() {
+        return overrideDestinationFolder;
+    }
+    
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.BUILD;
     }
