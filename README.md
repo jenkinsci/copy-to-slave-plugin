@@ -4,7 +4,7 @@ Copyright &copy; 2009-2011, Manufacture Française des Pneumatiques Michelin, Ro
 
 About this plugin
 -----------------
-The Copy To Slave plugin is meant to be used from or [Jenkins][2] to provide a way to copy files located somewhere on Jenkins' master node to the jobs' workspaces. Please take a look at [Jenkins' wiki][3] to get detailed information.
+The Copy To Slave plugin is meant to be used from [Jenkins][2] to provide a way to copy files located somewhere on Jenkins' master node to the jobs' workspaces. Please take a look at [Jenkins' wiki][3] to get detailed information.
 
 Installation
 ------------

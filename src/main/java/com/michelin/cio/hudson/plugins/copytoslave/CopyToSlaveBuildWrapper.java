@@ -114,8 +114,6 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', rootFilePathOnMaster.toURI(),
                     projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
-            CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
-
             // HUDSON-7999
             MyFilePath.copyRecursiveTo(
                     rootFilePathOnMaster,

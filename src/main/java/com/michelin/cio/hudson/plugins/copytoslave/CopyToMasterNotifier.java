@@ -90,7 +90,6 @@ public class CopyToMasterNotifier extends Notifier {
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), destinationFilePath.toURI());
 
-            CopyToSlaveUtils.hudson5977(projectWorkspaceOnSlave); // HUDSON-6045
             projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, destinationFilePath);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {

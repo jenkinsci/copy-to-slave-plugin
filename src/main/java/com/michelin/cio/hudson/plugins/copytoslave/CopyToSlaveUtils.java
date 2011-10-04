@@ -1,8 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010, Manufacture Française des Pneumatiques Michelin, Romain Seguy
- * Copyright (c) 2004-2010, Sun Microsystems, Inc., Alan Harder
+ * Copyright (c) 2010-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +28,8 @@ import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,32 +73,6 @@ public class CopyToSlaveUtils {
         }
 
         return projectWorkspaceOnMaster;
-    }
-
-    /**
-     * Workaround for HUDSON-5977.
-     *
-     * <p>The code of this method comes from the copyartifact plugin by Alan Harder,
-     * more precisely from {@code hudson.plugins.copyartifact.CopyArtifact.perform()},
-     * with some minor modifications.
-     * Cf. MIT License header.</p>
-     */
-    public static void hudson5977(FilePath targetDir) throws IOException, InterruptedException {
-        // Workaround for HUDSON-5977.. this block can be removed whenever
-        // copyartifact plugin raises its minimum Hudson version to whatever
-        // release fixes #5977.
-        // Make a call to copy a small file, to get all class-loading to happen.
-        // When we copy the real stuff there won't be any classloader requests
-        // coming the other direction, which due to full-buffer-deadlock problem
-        // can cause slave to hang.
-        URL base = Hudson.getInstance().getPluginManager()
-                         .getPlugin("copy-to-slave").baseResourceURL;
-        if (base!=null && "file".equals(base.getProtocol())) {
-            FilePath tmp = targetDir.createTempDir("copy-to-slave", ".dir");
-            MyFilePath.copyRecursiveTo(new FilePath(new File(base.getPath())), "HUDSON-5977/**", null, false, false, tmp);
-            tmp.deleteRecursive();
-        }
-        // End workaround
     }
 
     private final static Logger LOGGER = Logger.getLogger(CopyToSlaveUtils.class.getName());
