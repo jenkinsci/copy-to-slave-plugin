@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +23,8 @@
   -->
 
 <div>
-    Copies a set of files located somewhere on the master node (cf. the <b>Paths
-    are relative to</b> field) into the workspace of the corresponding job on
-    the node performing the build (whether it is a slave node or the master
-    node itself).<br/>
-    This is useful, for example, when some files required for the build to take
-    place are not present in the SCM, but are located in one of the three
-    following locations: <code>$JENKINS_HOME/userContent</code>,
-    <code>$JENKINS_HOME</code>, or directly in the project's
-    <a href='ws/'>workspace</a> (on the master node).
+    If this option is enabled, then users will be able to select
+    <code>$JENKINS_HOME</code> as a possible base location for copy to slave
+    operations, thus exposing the whole Hudson/Jenkins folder. <strong>As such,
+    enabling this option is highly discouraged.</strong>
 </div>

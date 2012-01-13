@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2009-2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,22 @@
         <f:textbox/>
     </f:entry>
     <f:entry title="${%RelativeTo}" field="relativeTo">
-        <f:radio name="copytoslave.relativeTo" value="userContent" checked="${instance.relativeTo == 'userContent' or instance.relativeTo == null}" id="relativeTo.userContent"/>
+        <f:radio name="copytoslave.relativeTo"
+                 value="userContent"
+                 checked="${instance.relativeTo == 'userContent' or instance.relativeTo == null}"
+                 id="relativeTo.userContent"/>
         <label class="attach-previous">${%UserContentRelative}</label><br/>
-        <f:radio name="copytoslave.relativeTo" value="home" checked="${instance.relativeTo == 'home'}" id="relativeTo.home"/>
-        <label class="attach-previous">${%HomeRelative}</label><br/>
+        <j:if test="${descriptor.somewhereElseEnabled}">
+            <f:radio name="copytoslave.relativeTo"
+                     value="somewhereElse"
+                     checked="${instance.relativeTo == 'somewhereElse'}"
+                     id="relativeTo.somewhereElse"/>
+            <label class="attach-previous"><code>${descriptor.somewhereElsePath}</code></label><br/>
+        </j:if>
+        <j:if test="${descriptor.relativeToHomeEnabled}">
+            <f:radio name="copytoslave.relativeTo" value="home" checked="${instance.relativeTo == 'home'}" id="relativeTo.home"/>
+            <label class="attach-previous">${%HomeRelative}</label><br/>
+        </j:if>
         <f:radio name="copytoslave.relativeTo" value="workspace" checked="${instance.relativeTo == 'workspace'}" id="relativeTo.workspace"/>
         <label class="attach-previous">${%WorkspaceRelative}</label>
     </f:entry>

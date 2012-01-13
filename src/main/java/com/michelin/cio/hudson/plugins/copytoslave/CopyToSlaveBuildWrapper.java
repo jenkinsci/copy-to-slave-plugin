@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2009-2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,10 +37,13 @@ import hudson.model.Hudson.MasterComputer;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import java.io.IOException;
+import javax.servlet.ServletException;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.localizer.Localizable;
 import org.jvnet.localizer.ResourceBundleHolder;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
@@ -48,6 +51,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
     public final static String RELATIVE_TO_HOME = "home";
+    public final static String RELATIVE_TO_SOMEWHERE_ELSE = "somewhereElse";
     public final static String RELATIVE_TO_USERCONTENT = "userContent";
     public final static String RELATIVE_TO_WORKSPACE = "workspace";
 
@@ -79,6 +83,11 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     }
 
     @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
+    @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
@@ -95,17 +104,23 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         }
         else {
             FilePath rootFilePathOnMaster;
+
             if(RELATIVE_TO_WORKSPACE.equals(relativeTo)) {
                 rootFilePathOnMaster = CopyToSlaveUtils.getProjectWorkspaceOnMaster(build, listener.getLogger());
             }
-            else if(RELATIVE_TO_HOME.equals(relativeTo)) {
+            else if(getDescriptor().isSomewhereElseEnabled() && RELATIVE_TO_SOMEWHERE_ELSE.equals(relativeTo)) {
+                rootFilePathOnMaster = new FilePath(
+                        Hudson.getInstance().getChannel(),
+                        env.expand(getDescriptor().getSomewhereElsePath()));
+            }
+            else if(getDescriptor().isRelativeToHomeEnabled() && RELATIVE_TO_HOME.equals(relativeTo)) { // JENKINS-12281
                 rootFilePathOnMaster = Hudson.getInstance().getRootPath();
             }
             else {
                 rootFilePathOnMaster = Hudson.getInstance().getRootPath().child("userContent");
             }
 
-            FilePath projectWorkspaceOnSlave = build.getProject().getWorkspace();
+            FilePath projectWorkspaceOnSlave = build.getWorkspace();
 
             String includes = env.expand(getIncludes());
             String excludes = env.expand(getExcludes());
@@ -165,8 +180,35 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
 
+        private boolean relativeToHomeEnabled; // JENKINS-12281
+        private boolean somewhereElseEnabled;
+        private String somewhereElsePath;
+
         public DescriptorImpl() {
             super(CopyToSlaveBuildWrapper.class);
+            load();
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            try {
+                relativeToHomeEnabled = req.getSubmittedForm().getBoolean("relativeToHomeEnabled");
+
+                somewhereElseEnabled = req.getSubmittedForm().getBoolean("somewhereElseEnabled");
+                
+                somewhereElsePath = req.getSubmittedForm().getString("somewhereElsePath");
+                if(StringUtils.isBlank(somewhereElsePath)) {
+                    somewhereElsePath = null;
+                    somewhereElseEnabled = false;
+                }
+
+                save();
+
+                return true;
+            }
+            catch (ServletException e) {
+                return false;
+            }
         }
 
         @Override
@@ -177,6 +219,18 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
             return true;
+        }
+
+        public String getSomewhereElsePath() {
+            return somewhereElsePath;
+        }
+
+        public boolean isRelativeToHomeEnabled() {
+            return relativeToHomeEnabled;
+        }
+
+        public boolean isSomewhereElseEnabled() {
+            return somewhereElseEnabled;
         }
 
     }

@@ -1,7 +1,7 @@
 <!--
   - The MIT License
   -
-  - Copyright (c) 2009-2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+  - Copyright (c) 2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,21 @@
   - THE SOFTWARE.
   -->
 
-<div>
-    Copies a set of files located somewhere on the master node (cf. the <b>Paths
-    are relative to</b> field) into the workspace of the corresponding job on
-    the node performing the build (whether it is a slave node or the master
-    node itself).<br/>
-    This is useful, for example, when some files required for the build to take
-    place are not present in the SCM, but are located in one of the three
-    following locations: <code>$JENKINS_HOME/userContent</code>,
-    <code>$JENKINS_HOME</code>, or directly in the project's
-    <a href='ws/'>workspace</a> (on the master node).
-</div>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="${%CopyToSlaveConfiguration}">
+        <f:optionalBlock title="${%EnableSomewhereElse}"
+                         name="somewhereElseEnabled"
+                         field="somewhereElseEnabled"
+                         checked="${it.somewhereElseEnabled}"
+                         inline="true">
+            <f:entry title="${%SomewhereElsePath}" field="somewhereElsePath">
+                <f:textbox/>
+            </f:entry>
+        </f:optionalBlock>
+        <f:optionalBlock title="${%EnableHomeRelative}"
+                         name="relativeToHomeEnabled"
+                         field="relativeToHomeEnabled"
+                         checked="${it.relativeToHomeEnabled}"
+                         inline="true"/>
+    </f:section>
+</j:jelly>
