@@ -12,7 +12,7 @@
   <packaging>hpi</packaging>
   <name>Copy To Slave Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.4</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,4 +27,10 @@
     </developer>
   </developers>
 
+
+  <scm>
+    <connection>scm:svn:https://svn.jenkins-ci.org/tags/copy-to-slave-1.4</connection>
+    <developerConnection>scm:svn:https://svn.jenkins-ci.org/tags/copy-to-slave-1.4</developerConnection>
+    <url>https://svn.jenkins-ci.org/tags/copy-to-slave-1.4</url>
+  </scm>
 </project>
