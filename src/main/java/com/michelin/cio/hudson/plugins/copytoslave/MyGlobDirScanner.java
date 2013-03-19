@@ -38,7 +38,11 @@ import org.apache.tools.ant.types.FileSet;
  */
 public class MyGlobDirScanner extends DirScanner {
 
-    private final String includes;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final String includes;
     private final String excludes;
     private final boolean includeAntExcludes;
 
