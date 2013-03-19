@@ -2,12 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
-    <artifactId>plugin</artifactId>
+    <groupId>org.kohsuke.stapler</groupId>
+    <artifactId>maven-stapler-plugin</artifactId>
     <version>1.409</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-
+ 
   <artifactId>copy-to-slave</artifactId>
   <packaging>hpi</packaging>
   <name>Copy To Slave Plugin</name>
@@ -40,6 +40,11 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+    <dependencies>
+    	<dependency>
+    		<groupId>3</groupId>
+    		<artifactId>4</artifactId>
+    	</dependency>
+    </dependencies>
+    <groupId>org.jenkins-ci.plugins</groupId>
 </project>  
-  
-

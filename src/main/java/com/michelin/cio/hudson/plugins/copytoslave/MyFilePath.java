@@ -61,6 +61,7 @@ import org.apache.tools.tar.TarEntry;
  *
  * <p>This class also fixes HUDSON-8155.</p>
  */
+
 public class MyFilePath implements Serializable {
 
     private static final long serialVersionUID = 1; // HUDSON-8274
@@ -188,10 +189,10 @@ public class MyFilePath implements Serializable {
 
                     IOUtils.copy(t, f);
 
+                   // f.setLastModified(tarEntry.getModTime().getTime());
                     f.setLastModified(tarEntry.getModTime().getTime());
-
                     // chmod
-                    int mode = tarEntry.getMode()&0777;
+                    int mode = tarEntry.getMode() & 777;
                     if(mode!=0 && !Functions.isWindows()) // be defensive
                         try {
                             LIBC.chmod(f.getPath(), mode);
