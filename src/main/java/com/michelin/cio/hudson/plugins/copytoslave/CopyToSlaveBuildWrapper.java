@@ -59,7 +59,7 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
     private final String excludes;
     private final boolean flatten;  // HUDSON-8220
     private final boolean includeAntExcludes; // HUDSON-8274 (partially)
-   
+    @Deprecated
     private final boolean hudsonHomeRelative; // HUDSON-7021 (as of 2011/03/01, replaced by relativeTo
                                               // and kept for backward compatibility)
     private final String relativeTo;

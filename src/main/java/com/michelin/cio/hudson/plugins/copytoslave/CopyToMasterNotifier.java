@@ -47,7 +47,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
  */
-@SuppressWarnings("unchecked")
 public class CopyToMasterNotifier extends Notifier {
 
     private final String includes;
@@ -68,9 +67,8 @@ public class CopyToMasterNotifier extends Notifier {
         return true;
     }
 
-    //@SuppressWarnings("deprecation")
-	@Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    @Override
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
 
