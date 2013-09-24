@@ -26,8 +26,8 @@
     <f:entry title="${%Includes}" field="includes">
         <f:textbox/>
     </f:entry>
-    <f:entry title="${%RunInBackground}" field="runInBackground">
-        <f:checkbox/>
+    <f:entry title="${%RunAfterResultFinalised}" field="runAfterResultFinalised">
+        <f:checkbox default="true"/>
     </f:entry>
     <f:advanced>
         <f:entry title="${%Excludes}" field="excludes">
