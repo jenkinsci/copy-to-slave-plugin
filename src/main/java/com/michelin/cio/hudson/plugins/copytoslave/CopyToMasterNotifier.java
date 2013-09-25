@@ -53,18 +53,20 @@ public class CopyToMasterNotifier extends Notifier {
     private final String excludes;
     private final boolean overrideDestinationFolder;
     private final String destinationFolder;
+    private final boolean runAfterResultFinalised;
 
     @DataBoundConstructor
-    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder) {
+    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder, boolean runAfterResultFinalised) {
         this.includes = includes;
         this.excludes = excludes;
         this.overrideDestinationFolder = overrideDestinationFolder;
         this.destinationFolder = destinationFolder;
+        this.runAfterResultFinalised = runAfterResultFinalised;
     }
 
     @Override
     public boolean needsToRunAfterFinalized() {
-        return true;
+        return getRunAfterResultFinalised();
     }
 
     @Override
@@ -114,6 +116,10 @@ public class CopyToMasterNotifier extends Notifier {
 
     public boolean isOverrideDestinationFolder() {
         return overrideDestinationFolder;
+    }
+    
+    public boolean getRunAfterResultFinalised() {
+        return runAfterResultFinalised;
     }
     
     public BuildStepMonitor getRequiredMonitorService() {
