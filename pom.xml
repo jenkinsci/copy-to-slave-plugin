@@ -12,7 +12,7 @@
   <packaging>hpi</packaging>
   <name>Copy To Slave Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
-  <version>1.4.1-SNAPSHOT</version>
+  <version>1.4.1</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,10 +20,10 @@
 
   <developers>
     <developer>
-      <id>rseguy</id>
-      <name>Romain Seguy</name>
-      <email>romain.seguy@gmail.com</email>
-      <timezone>+1</timezone>
+      <id>svvivek</id>
+      <name>Vivekanand S V</name>
+      <email>svvivekanand@gmail.com</email>
+      <timezone>+5.5</timezone>
     </developer>
   </developers>
 
