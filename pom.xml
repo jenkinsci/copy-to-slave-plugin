@@ -10,7 +10,7 @@
 
   <artifactId>copy-to-slave</artifactId>
   <packaging>hpi</packaging>
-  <name>CopyToSlave-Hilisilicon-Extension</name>
+  <name>Copy To Slave Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
   <version>1.4.5-SNAPSHOT</version>
 
