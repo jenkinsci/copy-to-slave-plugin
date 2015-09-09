@@ -33,10 +33,22 @@
                 <f:textbox/>
             </f:entry>
         </f:optionalBlock>
-        <f:optionalBlock title="${%EnableHomeRelative}"
-                         name="relativeToHomeEnabled"
-                         field="relativeToHomeEnabled"
-                         checked="${it.relativeToHomeEnabled}"
-                         inline="true"/>
-    </f:section>
+                <f:optionalBlock title="${%EnableHomeRelative}"
+                 name="relativeToHomeEnabled"
+                 field="relativeToHomeEnabled"
+                 checked="${it.relativeToHomeEnabled}"
+                 inline="true"/>
+        </f:section>             
+        <f:optionalBlock title="${%EnableZookeeperRelative}"
+                         name="zookeeperEnabled"
+                         field="zookeeperEnabled"
+                         checked="${it.zookeeperEnabled}"
+                         inline="true">
+             <f:entry title="${%ZookeeperAddress}" field="zookeeperAddress">
+                <f:textbox/>
+             </f:entry>
+             <f:entry title="${%ZookeeperPath}" field="zookeeperPath">
+                <f:textbox/>
+             </f:entry>
+        </f:optionalBlock>     
 </j:jelly>

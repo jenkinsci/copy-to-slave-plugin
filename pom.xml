@@ -10,7 +10,7 @@
 
   <artifactId>copy-to-slave</artifactId>
   <packaging>hpi</packaging>
-  <name>Copy To Slave Plugin</name>
+  <name>CopyToSlave-Hilisilicon-Extension</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
   <version>1.4.5-SNAPSHOT</version>
 
@@ -46,7 +46,14 @@
       <developerConnection>scm:git:https://github.com/jenkinsci/copy-to-slave-plugin.git</developerConnection>
       <url>https://github.com/jenkinsci/copy-to-slave-plugin</url>
      </scm>
-     
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.4.6</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>  
   
 
