@@ -25,6 +25,12 @@
       <email>svvivekanand@gmail.com</email>
       <timezone>+5.5</timezone>
     </developer>
+	 <developer>
+	 	<id>sshelomentsev</id>
+		<name>Sergey Shelomentsev</name>
+		<email>sergey.v.shelomentsev@gmail.com</email>
+		<timezone>+7</timezone>
+	 </developer>
   </developers>
 
     <repositories>
