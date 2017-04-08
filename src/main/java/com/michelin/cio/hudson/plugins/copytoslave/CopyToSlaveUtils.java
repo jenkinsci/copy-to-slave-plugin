@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
@@ -60,9 +61,12 @@ public class CopyToSlaveUtils {
             }
         }
         else {
+            // Quote separator, as String.split() takes a regex and
+            // File.separator isn't a valid regex character on Windows
+            final String separator = Pattern.quote(File.separator);
             String pathOnMaster = Jenkins.getInstance().getWorkspaceFor((TopLevelItem)project.getRootProject()).getRemote();
             String parts[] = build.getWorkspace().getRemote().
-                    split("workspace" + File.separator + project.getRootProject().getName());
+                    split("workspace" + separator + project.getRootProject().getName());
             if (parts.length > 1) {
                 // This happens for the non free style projects (like multi configuration projects, etc)
                 // So we'll just add the extra part of the path to the workspace
