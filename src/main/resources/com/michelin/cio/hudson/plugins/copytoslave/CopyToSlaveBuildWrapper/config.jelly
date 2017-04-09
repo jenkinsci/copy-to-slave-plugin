@@ -39,6 +39,13 @@
                      id="relativeTo.somewhereElse"/>
             <label class="attach-previous"><code>${descriptor.somewhereElsePath}</code></label><br/>
         </j:if>
+        <j:if test="${descriptor.zookeeperEnabled}">
+            <f:radio name="copytoslave.relativeTo"
+                     value="zookeeper"
+                     checked="${instance.relativeTo == 'zookeeper'}"
+                     id="relativeTo.zookeeper"/>
+            <label class="attach-previous"><code>${descriptor.zookeeperPath}</code></label><br/>
+        </j:if>
         <j:if test="${descriptor.relativeToHomeEnabled}">
             <f:radio name="copytoslave.relativeTo" value="home" checked="${instance.relativeTo == 'home'}" id="relativeTo.home"/>
             <label class="attach-previous">${%HomeRelative}</label><br/>

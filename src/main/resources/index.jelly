@@ -26,4 +26,5 @@
     This plugin allows copying files located somewhere on the master node into
     the jobs' workspaces, whether their builds take place on the master node or
     on slave nodes.
+    Hisilicon extend copying files located on the zookeeper.
 </div>
