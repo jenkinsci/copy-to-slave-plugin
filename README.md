@@ -1,6 +1,6 @@
 Copy To Slave plugin
 ====================
-Copyright &copy; 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy, and other contributors. Licensed under MIT License.
+Copyright &copy; 2009-2017, Manufacture Française des Pneumatiques Michelin, Romain Seguy, and other contributors. Licensed under MIT License.
 
 About this plugin
 -----------------
