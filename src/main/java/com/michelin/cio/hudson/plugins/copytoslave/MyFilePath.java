@@ -132,6 +132,7 @@ public class MyFilePath implements Serializable {
 
                 public Void invoke(File f, VirtualChannel channel) throws IOException {
                     try {
+                        //cleanup baseDir
                         readFromTar(f, flatten, TarCompression.GZIP.extract(pipe.getIn()));
                         return null;
                     } finally {

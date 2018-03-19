@@ -54,14 +54,16 @@ public class CopyToMasterNotifier extends Notifier {
     private final boolean overrideDestinationFolder;
     private final String destinationFolder;
     private final boolean runAfterResultFinalised;
+    private final boolean deleteFilesNotExist;
 
     @DataBoundConstructor
-    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder, boolean runAfterResultFinalised) {
+    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder, boolean runAfterResultFinalised, boolean deleteFilesNotExist) {
         this.includes = includes;
         this.excludes = excludes;
         this.overrideDestinationFolder = overrideDestinationFolder;
         this.destinationFolder = destinationFolder;
         this.runAfterResultFinalised = runAfterResultFinalised;
+        this.deleteFilesNotExist = deleteFilesNotExist;
     }
 
     @Override
@@ -92,6 +94,12 @@ public class CopyToMasterNotifier extends Notifier {
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), destinationFilePath.toURI());
 
+            if (getDeleteFilesNotExist()) {
+                listener.getLogger().println(
+                    "[copy-to-slave] deleteFilesNotExist is true");
+                destinationFilePath.deleteContents();
+            }
+            
             projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, destinationFilePath);
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
@@ -100,6 +108,20 @@ public class CopyToMasterNotifier extends Notifier {
         }
 
         return true;
+    }
+
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if(files!=null) { //some JVMs return null for empty dirs
+            for(File f: files) {
+                if(f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
     }
 
     public String getIncludes() {
@@ -120,6 +142,10 @@ public class CopyToMasterNotifier extends Notifier {
     
     public boolean getRunAfterResultFinalised() {
         return runAfterResultFinalised;
+    }
+
+    public boolean getDeleteFilesNotExist() {
+        return deleteFilesNotExist;
     }
     
     public BuildStepMonitor getRequiredMonitorService() {
