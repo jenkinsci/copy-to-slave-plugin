@@ -37,6 +37,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.DirScanner;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
@@ -100,7 +101,10 @@ public class CopyToMasterNotifier extends Notifier {
                 destinationFilePath.deleteContents();
             }
             
-            projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, destinationFilePath);
+            //projectWorkspaceOnSlave.copyRecursiveTo(includes, null, destinationFilePath);
+            DirScanner filesToCopy = new DirScanner.Glob(includes, excludes);
+            projectWorkspaceOnSlave.copyRecursiveTo(filesToCopy, destinationFilePath, includes);
+            
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
