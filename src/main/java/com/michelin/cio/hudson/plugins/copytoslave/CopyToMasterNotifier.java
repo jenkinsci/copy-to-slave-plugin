@@ -100,10 +100,8 @@ public class CopyToMasterNotifier extends Notifier {
                     "[copy-to-slave] deleteFilesNotExist is true");
                 destinationFilePath.deleteContents();
             }
-            
-            //projectWorkspaceOnSlave.copyRecursiveTo(includes, null, destinationFilePath);
-            DirScanner filesToCopy = new DirScanner.Glob(includes, excludes);
-            projectWorkspaceOnSlave.copyRecursiveTo(filesToCopy, destinationFilePath, includes);
+                       
+            FilePathUtils.copyRecursiveTo(includes, excludes, projectWorkspaceOnSlave, destinationFilePath);
             
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
