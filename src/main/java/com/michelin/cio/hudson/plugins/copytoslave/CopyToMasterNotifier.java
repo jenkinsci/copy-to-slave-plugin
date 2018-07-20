@@ -37,6 +37,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.DirScanner;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
@@ -54,14 +55,16 @@ public class CopyToMasterNotifier extends Notifier {
     private final boolean overrideDestinationFolder;
     private final String destinationFolder;
     private final boolean runAfterResultFinalised;
+    private final boolean deleteFilesNotExist;
 
     @DataBoundConstructor
-    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder, boolean runAfterResultFinalised) {
+    public CopyToMasterNotifier(String includes, String excludes, boolean overrideDestinationFolder, String destinationFolder, boolean runAfterResultFinalised, boolean deleteFilesNotExist) {
         this.includes = includes;
         this.excludes = excludes;
         this.overrideDestinationFolder = overrideDestinationFolder;
         this.destinationFolder = destinationFolder;
         this.runAfterResultFinalised = runAfterResultFinalised;
+        this.deleteFilesNotExist = deleteFilesNotExist;
     }
 
     @Override
@@ -92,7 +95,14 @@ public class CopyToMasterNotifier extends Notifier {
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), destinationFilePath.toURI());
 
-            projectWorkspaceOnSlave.copyRecursiveTo(includes, excludes, destinationFilePath);
+            if (getDeleteFilesNotExist()) {
+                listener.getLogger().println(
+                    "[copy-to-slave] deleteFilesNotExist is true");
+                destinationFilePath.deleteContents();
+            }
+                       
+            FilePathUtils.copyRecursiveTo(includes, excludes, projectWorkspaceOnSlave, destinationFilePath);
+            
         }
         else if(Computer.currentComputer() instanceof MasterComputer) {
             listener.getLogger().println(
@@ -120,6 +130,10 @@ public class CopyToMasterNotifier extends Notifier {
     
     public boolean getRunAfterResultFinalised() {
         return runAfterResultFinalised;
+    }
+
+    public boolean getDeleteFilesNotExist() {
+        return deleteFilesNotExist;
     }
     
     public BuildStepMonitor getRequiredMonitorService() {
