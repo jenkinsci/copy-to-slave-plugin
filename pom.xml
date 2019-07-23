@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>copy-to-slave</artifactId>
-    <version>1.4.6</version>
+    <version>1.4.8</version>
     <packaging>hpi</packaging>
     <properties>
         <jenkins.version>1.625</jenkins.version>
@@ -46,7 +46,7 @@
         <connection>scm:git:ssh://github.com:jmcgeheeiv/copy-to-slave-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jmcgeheeiv/copy-to-slave-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/copy-to-slave-plugin</url>
-        <tag>copy-to-slave-1.4.6</tag>
+        <tag>copy-to-slave-1.4.7</tag>
     </scm>
 
     <repositories>
