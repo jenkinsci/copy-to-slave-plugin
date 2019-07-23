@@ -43,8 +43,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://github.com:jenkinsci/copy-to-slave-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/copy-to-slave-plugin.git</developerConnection>
+        <connection>scm:git:ssh://github.com:jmcgeheeiv/copy-to-slave-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jmcgeheeiv/copy-to-slave-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/copy-to-slave-plugin</url>
         <tag>copy-to-slave-1.4.6</tag>
     </scm>
