@@ -129,12 +129,10 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', rootFilePathOnMaster.toURI(),
                     projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
-            // HUDSON-7999
-            MyFilePath.copyRecursiveTo(
-                    rootFilePathOnMaster,
-                    includes,
-                    excludes,
-                    isFlatten(), isIncludeAntExcludes(), projectWorkspaceOnSlave);
+            // JENKINS-7999 is fixed, so now use Jenkins FilePath instead of the
+            // custom MyFilePath included in this plugin
+            rootFilePathOnMaster.copyRecursiveTo(includes, excludes,
+                    projectWorkspaceOnSlave);
         }
 
         return new Environment() {
