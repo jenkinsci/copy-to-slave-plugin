@@ -1,0 +1,10 @@
+<!-- FindBugs exclude file -->
+<!-- This is just a (currently unused, as-yet invalid) template.  If you want
+     to use it, add valid patterns, remove this comment, and enable it in pom.xml -->
+<FindBugsFilter>
+  <Match>
+    <Or>
+      <Bug pattern="xxx"/>
+    </Or>
+  </Match>
+</FindBugsFilter>

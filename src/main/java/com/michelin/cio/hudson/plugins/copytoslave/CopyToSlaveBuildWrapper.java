@@ -2,6 +2,7 @@
  * The MIT License
  *
  * Copyright (c) 2009-2012, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2019, Wave Computing, Inc. John McGehee
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +24,13 @@
  */
 package com.michelin.cio.hudson.plugins.copytoslave;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
@@ -47,6 +48,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * @author Romain Seguy (http://openromain.blogspot.com)
+ * @author John McGehee (http://johnnado.com)
  */
 public class CopyToSlaveBuildWrapper extends BuildWrapper {
 
@@ -87,6 +89,8 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+            justification="TODO: Fix this after qualifying the new plugin")
     @Override
     public Environment setUp(AbstractBuild build, final Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         EnvVars env = build.getEnvironment(listener);
@@ -125,7 +129,7 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
             String includes = env.expand(getIncludes());
             String excludes = env.expand(getExcludes());
 
-            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on the master to '%s' on '%s'.\n",
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on the master to '%s' on '%s'.%n",
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', rootFilePathOnMaster.toURI(),
                     projectWorkspaceOnSlave.toURI(), Computer.currentComputer().getNode().getDisplayName());
 
@@ -142,11 +146,6 @@ public class CopyToSlaveBuildWrapper extends BuildWrapper {
                 return true;
             }
         };
-    }
-
-    @Override
-    public Environment setUp(Build build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        return setUp(build, launcher, listener);
     }
 
     public String getIncludes() {

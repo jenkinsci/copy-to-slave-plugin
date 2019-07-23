@@ -2,6 +2,7 @@
  * The MIT License
  *
  * Copyright (c) 2009-2011, Manufacture Française des Pneumatiques Michelin, Romain Seguy
+ * Copyright (c) 2019, Wave Computing, Inc. John McGehee
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +89,7 @@ public class CopyToMasterNotifier extends Notifier {
             String includes = env.expand(getIncludes());
             String excludes = env.expand(getExcludes());
 
-            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on '%s' to '%s' on the master.\n",
+            listener.getLogger().printf("[copy-to-slave] Copying '%s', excluding %s, from '%s' on '%s' to '%s' on the master.%n",
                     includes, StringUtils.isBlank(excludes) ? "nothing" : '\'' + excludes + '\'', projectWorkspaceOnSlave.toURI(),
                     Computer.currentComputer().getNode(), destinationFilePath.toURI());
 
