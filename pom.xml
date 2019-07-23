@@ -1,57 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.424</version>
-  </parent>
-
-  <artifactId>copy-to-slave</artifactId>
-  <packaging>hpi</packaging>
-  <name>Copy To Slave Plugin</name>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
-  <version>1.4.5-SNAPSHOT</version>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <developers>
-    <developer>
-      <id>svvivek</id>
-      <name>Vivekanand S V</name>
-      <email>svvivekanand@gmail.com</email>
-      <timezone>+5.5</timezone>
-    </developer>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>3.4</version>
+        <relativePath />
+    </parent>
+    <groupId>io.jenkins.plugins</groupId>
+    <artifactId>copy-to-slave</artifactId>
+    <version>1.4.6-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+    <properties>
+        <jenkins.version>1.625</jenkins.version>
+        <java.level>8</java.level>
+        <!-- TODO: JENKINS-36716 - Switch to Medium once FindBugs is cleaned up -->
+        <!-- <findbugs.effort>Max</findbugs.effort>
+        <findbugs.threshold>High</findbugs.threshold> -->
+        <findbugs.excludeFilterFile>${project.basedir}/src/findbugs/findbugs-excludes.xml</findbugs.excludeFilterFile>
+    </properties>
+    <name>Copy To Slave Plugin</name>
+    <description>Copy files between the master and agent (Insecure)</description>
+    <url>http://wiki.jenkins-ci.org/display/JENKINS/Copy+To+Slave+Plugin</url>
+    <developers>
+        <developer>
+            <id>jmcgeheeiv</id>
+            <name>John McGehee</name>
+            <email>jmcgeheeiv@users.noreply.github.com</email>
+        </developer>
+        <developer>
+            <id>svvivek</id>
+            <name>Vivekanand S V</name>
+            <email>svvivekanand@gmail.com</email>
+            <timezone>+5.5</timezone>
+         </developer>
 	 <developer>
-	 	<id>sshelomentsev</id>
-		<name>Sergey Shelomentsev</name>
-		<email>sergey.v.shelomentsev@gmail.com</email>
-		<timezone>+7</timezone>
-	 </developer>
-  </developers>
+             <id>sshelomentsev</id>
+             <name>Sergey Shelomentsev</name>
+             <email>sergey.v.shelomentsev@gmail.com</email>
+             <timezone>+7</timezone>
+         </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:ssh://github.com:jenkinsci/copy-to-slave-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/copy-to-slave-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/copy-to-slave-plugin</url>
+        <tag>copy-to-slave-plugin-1.4.5</tag>
+    </scm>
 
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
-
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    
-     <scm>
-      <connection>scm:git:git://github.com/jenkinsci/copy-to-slave-plugin.git</connection>
-      <developerConnection>scm:git:https://github.com/jenkinsci/copy-to-slave-plugin.git</developerConnection>
-      <url>https://github.com/jenkinsci/copy-to-slave-plugin</url>
-     </scm>
-     
-</project>  
-  
-
+    <issueManagement>
+        <url>https://github.com/jenkinsci/copy-to-slave-plugin/issues</url>
+        <system>GitHub</system>
+    </issueManagement>
+    <organization>
+        <name>Wave Computing, Inc.</name>
+        <url>http://www.wavecomp.ai</url>
+    </organization>
+    <profiles>
+        <profile>
+            <id>disable-java8-doclint</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <!-- Disable Javadoc Lint because so many @param, @return, @throws have 
+                    no explanation, making the build fail. -->
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+        </profile>
+    </profiles>
+</project>
