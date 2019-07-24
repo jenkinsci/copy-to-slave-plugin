@@ -24,6 +24,7 @@
 
 package com.michelin.cio.hudson.plugins.copytoslave;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -41,10 +42,14 @@ import java.util.regex.Pattern;
  */
 public class CopyToSlaveUtils {
 
+    @SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+            justification="Return value guarded with assertion")
     public static FilePath getProjectWorkspaceOnMaster(AbstractBuild build, PrintStream logger) {
         return getProjectWorkspaceOnMaster(build, build.getProject(), logger);
     }
 
+    @SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+            justification="Return value guarded with assertion")
     public static FilePath getProjectWorkspaceOnMaster(AbstractBuild build, AbstractProject project, PrintStream logger) {
         FilePath projectWorkspaceOnMaster;
 
@@ -74,6 +79,8 @@ public class CopyToSlaveUtils {
             }
             projectWorkspaceOnMaster = new FilePath(new File(pathOnMaster));
         }
+
+        assert projectWorkspaceOnMaster != null;
 
         try {
             // create the workspace if it doesn't exist yet

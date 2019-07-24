@@ -22,8 +22,10 @@
   - THE SOFTWARE.
   -->
 
+<?jelly escape-by-default='true'?>
 <div>
     This plugin allows copying files located somewhere on the master node into
     the jobs' workspaces, whether their builds take place on the master node or
-    on slave nodes.
+    on slave nodes. However, THIS PLUGIN HAS BEEN DEEMED INSECURE, as it allows
+    access to arbitrary files on the Jenkins master file system.
 </div>
