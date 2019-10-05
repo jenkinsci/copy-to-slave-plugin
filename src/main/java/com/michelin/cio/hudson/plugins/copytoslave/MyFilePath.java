@@ -31,7 +31,6 @@ import hudson.FilePath.TarCompression;
 import hudson.Functions;
 import hudson.Util;
 import hudson.model.Hudson;
-import hudson.org.apache.tools.tar.TarInputStream;
 import hudson.remoting.Future;
 import hudson.remoting.Pipe;
 import hudson.remoting.VirtualChannel;
@@ -53,6 +52,7 @@ import org.apache.tools.ant.taskdefs.Chmod;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 
 /**
  * Complements Hudson's {@link FilePath} to enhance the {@code copyRecursiveTo()}
